@@ -11,7 +11,8 @@ import json
 # --- CONFIGURATION ---
 BOT_TOKEN = "7951857029:AAGkVwayuNFbIK7b3SS6Ev0gZWdN0-bJb0E"
 BOT_OWNER = 5851079012
-REQUIRED_CHANNEL = -1002004427126
+REQUIRED_CHANNEL_1 = -1002004427126  # Original Channel
+REQUIRED_CHANNEL_2 = -1002147999578 # Add your 2nd Channel ID here
 DATA_FILE = "grp_data.json"
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -69,9 +70,17 @@ def is_group(message):
 
 def is_channel_member(user_id):
     try:
-        member = bot.get_chat_member(REQUIRED_CHANNEL, user_id)
-        return member.status in ['member', 'administrator', 'creator']
-    except:
+        # Check Channel 1
+        member1 = bot.get_chat_member(REQUIRED_CHANNEL_1, user_id)
+        is_in_1 = member1.status in ['member', 'administrator', 'creator']
+        
+        # Check Channel 2
+        member2 = bot.get_chat_member(REQUIRED_CHANNEL_2, user_id)
+        is_in_2 = member2.status in ['member', 'administrator', 'creator']
+        
+        return is_in_1 and is_in_2  # Must be in BOTH
+    except Exception as e:
+        print(f"Membership check error: {e}")
         return False
 
 def check_access(message):
@@ -79,16 +88,27 @@ def check_access(message):
     if is_owner(user_id) and not is_group(message):
         return True
     if not is_group(message):
-        bot.reply_to(message, "🚫 **ACCESS DENIED**\n\n`Unauthorized for personal use.` This terminal only operates within approved group nodes.")
+        bot.reply_to(message, "🚫 **ACCESS DENIED**\n\n`Unauthorized for personal use.`")
         return False
+        
+    # Checking both channels
     if not is_channel_member(user_id):
-        bot.reply_to(message, "⚠️ **UPLINK REQUIRED**\n\nYou must join the headquarters channel first.\n\n👉 https://t.me/+Bh56Y28y4k5kZDM1")
+        bot.reply_to(message, 
+            "⚠️ **UPLINK REQUIRED**\n\n"
+            "You must join **BOTH** headquarters channels to gain access:\n\n"
+            "1️⃣ [Join Channel 1](https://t.me/+Bh56Y28y4k5kZDM1)\n"
+            "2️⃣ [Join Channel 2](https://t.me/+G9DpAkyGtTZiODI9)\n\n"
+            "👉 *Once joined, try the command again.*", 
+            parse_mode="Markdown", 
+            disable_web_page_preview=True
+        )
         return False
+        
     if not is_approved_group(message.chat.id):
-        bot.reply_to(message, "❌ **NODE NOT WHITELISTED**\n\nThis group is not authorized. Contact the System Architect to approve this ID.")
+        bot.reply_to(message, "❌ **NODE NOT WHITELISTED**")
         return False
     if is_banned(user_id):
-        bot.reply_to(message, "🚫 **IDENTITY NULLIFIED**\n\nYou have been blacklisted from the system.")
+        bot.reply_to(message, "🚫 **IDENTITY NULLIFIED**")
         return False
     return True
 
