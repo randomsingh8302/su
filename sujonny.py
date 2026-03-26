@@ -13,7 +13,7 @@ import psutil
 
 BOT_START_TIME = datetime.now()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "6982857776:AAFDG6KtTz4T6jYjeZiwFdqZgTpqSW8Mj3Y")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8490476672:AAFNdN_tpj7sMhTmV-SOic1rOmzuxqPAbfk")
 MONGO_URL = os.getenv("MONGO_URL", "mongodb+srv://random83:random83@cluster0.nat9vrz.mongodb.net/?appName=Cluster0")
 
 print("Connecting to MongoDB...")
@@ -52,7 +52,8 @@ RESELLER_PRICING = {
 }
 
 API_LIST = [
-    "https://beamed.cc/layer4/?user=4988&key=KlkOr6OcnuGYkhrW&host={ip}&port={port}&time={time}&method=PUBG&concs=1"
+    "https://beamed.cc/layer4/?user=4988&key=Lsqu7BoWCrkVR3Ah&host={ip}&port={port}&time={time}&method=PUBG&concs=1",
+    "https://beamed.cc/layer4/?user=4988&key=Lsqu7BoWCrkVR3Ah&host={ip}&port={port}&time={time}&method=PUBG&concs=1"
     
 ]
 
