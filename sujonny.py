@@ -13,7 +13,7 @@ import psutil
 
 BOT_START_TIME = datetime.now()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "6982857776:AAFDG6KtTz4T6jYjeZiwFdqZgTpqSW8Mj3Y")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "7431527955:AAH735I65NnKPqpqK7--ZFCQay3BzgsPSL0")
 MONGO_URL = os.getenv("MONGO_URL", "mongodb+srv://random83:random83@cluster0.nat9vrz.mongodb.net/?appName=Cluster0")
 
 print("Connecting to MongoDB...")
