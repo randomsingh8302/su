@@ -52,10 +52,10 @@ RESELLER_PRICING = {
 }
 
 API_LIST = [
-    "https://beamed.st/layer4/?user=4988&key=CPC4F2CIbJFX6Hik&host={ip}&port={port}&time={time}&method=PUBG&concs=1",
-    "https://beamed.st/layer4/?user=4988&key=CPC4F2CIbJFX6Hik&host={ip}&port={port}&time={time}&method=PUBG&concs=1",
-    "https://beamed.st/layer4/?user=4988&key=CPC4F2CIbJFX6Hik&host={ip}&port={port}&time={time}&method=PUBG&concs=1",
-    "https://beamed.st/layer4/?user=4988&key=CPC4F2CIbJFX6Hik&host={ip}&port={port}&time={time}&method=PUBG&concs=1"
+    "https://beamed.st/start/?user=4988&key=CPC4F2CIbJFX6Hik&handler=layer4&host={ip}&port={port}&time={time}&method=PUBG&concs=1",
+    "https://beamed.st/start/?user=4988&key=CPC4F2CIbJFX6Hik&handler=layer4&host={ip}&port={port}&time={time}&method=PUBG&concs=1",
+    "https://beamed.st/start/?user=4988&key=CPC4F2CIbJFX6Hik&handler=layer4&host={ip}&port={port}&time={time}&method=PUBG&concs=1",
+    "https://beamed.st/start/?user=4988&key=CPC4F2CIbJFX6Hik&handler=layer4&host={ip}&port={port}&time={time}&method=PUBG&concs=1"
     
 ]
 
